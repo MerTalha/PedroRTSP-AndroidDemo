@@ -4,15 +4,35 @@ import androidx.appcompat.app.AppCompatActivity;
 
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.res.Configuration;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.Toast;
+import android.widget.VideoView;
 
-public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback, SamplePlayer.OnVideoSizeChangedListener {
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource.Factory;
 
-    private SurfaceView surfaceView;
-    private SurfaceHolder surfaceHolder;
-    private RtspPlayer rtspPlayer;
+
+public class MainActivity extends Activity {
+
+
+
+    private ExoPlayer player;
+    private PlayerView playerView;
+
     private String rtspUrl = "rtsp://DVR_KAMERANIN_IP_ADRESI:554/STREAM_PATH";
 
     @SuppressLint("MissingInflatedId")
@@ -21,50 +41,34 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        surfaceView = findViewById(R.id.surfaceView);
-        surfaceHolder = surfaceView.getHolder();
-        surfaceHolder.addCallback((SurfaceHolder.Callback) this);
+        playerView = findViewById(R.id.playerView);
 
-        rtspPlayer = new RtspPlayer();
-        rtspPlayer.setOnVideoSizeChangedListener(this);
-
-    }
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        rtspPlayer.setSurfaceHolder(holder);
-        rtspPlayer.setDisplaySize(surfaceView.getWidth(), surfaceView.getHeight());
+        initializePlayer();
     }
 
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-    }
+    private void initializePlayer() {
+        player = ExoPlayerFactory.newSimpleInstance(this, new DefaultTrackSelector(), new DefaultLoadControl());
+        playerView.setPlayer(player);
 
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        rtspPlayer.setSurfaceHolder(null);
-    }
+        String userAgent = Util.getUserAgent(this, "Your Application Name");
+        ExtractorMediaSource mediaSource = new ExtractorMediaSource.Factory(new DefaultHttpDataSourceFactory(userAgent))
+                .setExtractorsFactory(new DefaultExtractorsFactory())
+                .createMediaSource(Uri.parse(rtspUrl));
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        rtspPlayer.setRtspUrl(rtspUrl);
-        rtspPlayer.play();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        rtspPlayer.pause();
+        player.prepare(mediaSource);
+        player.setPlayWhenReady(true);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        rtspPlayer.stop();
+        releasePlayer();
     }
 
-    @Override
-    public void onVideoSizeChanged(int width, int height) {
-        // Video boyutu değiştiğinde yapılacak işlemler
+    private void releasePlayer() {
+        if (player != null) {
+            player.release();
+            player = null;
+        }
     }
 }

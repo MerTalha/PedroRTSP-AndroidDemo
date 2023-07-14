@@ -2,6 +2,7 @@ pluginManagement {
     repositories {
         google()
         maven { url 'https://jitpack.io' }
+        maven { url "https://exoplayer.dev/s3maven" }
         mavenCentral()
         gradlePluginPortal()
     }
