@@ -1,74 +1,100 @@
 package com.example.pedrortsp_androiddemo;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.res.Configuration;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.widget.Toast;
-import android.widget.VideoView;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
-import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.util.Util;
-import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource.Factory;
+import org.videolan.libvlc.util.VLCVideoLayout;
 
 
 public class MainActivity extends Activity {
 
+    private static final String[] urlList = {
+            "rtsp://192.168.1.10:554/user=admin&password=&channel=1&stream=0.sdp?",
+            "rtsp://192.168.1.10:554/user=admin&password=&channel=3&stream=0.sdp?"
+    };
+    private static final String[] cameraList = {
+            "Camera 1",
+            "Camera 2"
+    };
 
-
-    private ExoPlayer player;
-    private PlayerView playerView;
-
-    private String rtspUrl = "rtsp://DVR_KAMERANIN_IP_ADRESI:554/STREAM_PATH";
+    private VideoStreamPlayer streamPlayer;
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //rtsp://192.168.1.10:554/user=admin&password=EXLXEXKX&channel=1&stream=0.sdp?
 
-        playerView = findViewById(R.id.playerView);
+        VLCVideoLayout videoLayout = findViewById(R.id.videoLayout);
+        streamPlayer = new VideoStreamPlayer(this, videoLayout);
 
-        initializePlayer();
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                cameraList
+        );
+
+        Spinner dropdown = findViewById(R.id.cameraDropdown);
+        dropdown.setAdapter(adapter);
+        dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View v, int pos, long id)
+            {
+                streamPlayer.stop();
+                streamPlayer.start(urlList[pos]);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
     }
 
-    private void initializePlayer() {
-        player = ExoPlayerFactory.newSimpleInstance(this, new DefaultTrackSelector(), new DefaultLoadControl());
-        playerView.setPlayer(player);
+   /* @Override
+    protected void onStart()
+    {
+        super.onStart();
 
-        String userAgent = Util.getUserAgent(this, "Your Application Name");
-        ExtractorMediaSource mediaSource = new ExtractorMediaSource.Factory(new DefaultHttpDataSourceFactory(userAgent))
-                .setExtractorsFactory(new DefaultExtractorsFactory())
-                .createMediaSource(Uri.parse(rtspUrl));
+        ArrayList<String> options = new ArrayList<String>();
+        options.add("--aout=opensles");
+        options.add("--audio-time-stretch"); // time stretching
+        options.add("-vvv"); // verbosity
+        libVlc = new LibVLC(MainActivity.this, options);
+        media.addOption("--aout=opensles");
+        media.addOption("--audio-time-stretch"); // time stretching
+        media.addOption("-vvv"); // verbosity
+        media.addOption("--aout=opensles");
+        media.addOption("--avcodec-codec=h264");
+        media.addOption("--file-logging");
+        media.addOption("--logfile=vlc-log.txt");
+        int cache = 1500;
+        media.addOption(":network-caching=" + cache);
+        media.addOption(":file-caching=" + cache);
+        media.addOption(":live-cacheing=" + cache);
+        media.addOption(":sout-mux-caching=" + cache);
+        media.addOption(":codec=mediacodec,iomx,all");
 
-        player.prepare(mediaSource);
-        player.setPlayWhenReady(true);
+    }*/
+
+
+    @Override
+    protected void onStop()
+    {
+        super.onStop();
+        streamPlayer.stop();
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy()
+    {
         super.onDestroy();
-        releasePlayer();
+        streamPlayer.release();
     }
 
-    private void releasePlayer() {
-        if (player != null) {
-            player.release();
-            player = null;
-        }
-    }
+
 }

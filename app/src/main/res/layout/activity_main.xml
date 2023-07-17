@@ -6,10 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-
-    <com.google.android.exoplayer2.ui.PlayerView
-        android:id="@+id/playerView"
+    <Spinner
+        android:id="@+id/cameraDropdown"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content"
+         />
+
+    <org.videolan.libvlc.util.VLCVideoLayout
+        android:id="@+id/videoLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/cameraDropdown"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
