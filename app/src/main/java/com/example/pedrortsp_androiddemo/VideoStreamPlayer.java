@@ -31,7 +31,7 @@ public class VideoStreamPlayer extends Activity {
         media.addOption(":codec=mediacodec,iomx,all");
         media.addOption(":vcodec=h264");
         media.addOption(":rtsp-tcp");
-        media.addOption(":network-caching=110");
+        media.addOption(":network-caching=105");
         media.addOption(":clock-jitter=0");
         media.addOption(":clock-synchro=0");
         media.addOption(":clock-quantization=0");
