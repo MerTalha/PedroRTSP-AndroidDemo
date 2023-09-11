@@ -14,12 +14,10 @@ import org.videolan.libvlc.util.VLCVideoLayout;
 public class MainActivity extends Activity {
 
     private static final String[] urlList = {
-            "rtsp://192.168.1.10:554/user=admin&password=&channel=1&stream=0.sdp?",
-            "rtsp://192.168.1.10:554/user=admin&password=&channel=3&stream=0.sdp?"
+            "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4"
     };
     private static final String[] cameraList = {
-            "Camera 1",
-            "Camera 2"
+            "Camera 1"
     };
 
     private VideoStreamPlayer streamPlayer;
@@ -29,7 +27,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //rtsp://192.168.1.10:554/user=admin&password=EXLXEXKX&channel=1&stream=0.sdp?
 
         VLCVideoLayout videoLayout = findViewById(R.id.videoLayout);
         streamPlayer = new VideoStreamPlayer(this, videoLayout);
@@ -49,46 +46,16 @@ public class MainActivity extends Activity {
                 streamPlayer.stop();
                 streamPlayer.start(urlList[pos]);
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
     }
-
-   /* @Override
-    protected void onStart()
-    {
-        super.onStart();
-
-        ArrayList<String> options = new ArrayList<String>();
-        options.add("--aout=opensles");
-        options.add("--audio-time-stretch"); // time stretching
-        options.add("-vvv"); // verbosity
-        libVlc = new LibVLC(MainActivity.this, options);
-        media.addOption("--aout=opensles");
-        media.addOption("--audio-time-stretch"); // time stretching
-        media.addOption("-vvv"); // verbosity
-        media.addOption("--aout=opensles");
-        media.addOption("--avcodec-codec=h264");
-        media.addOption("--file-logging");
-        media.addOption("--logfile=vlc-log.txt");
-        int cache = 1500;
-        media.addOption(":network-caching=" + cache);
-        media.addOption(":file-caching=" + cache);
-        media.addOption(":live-cacheing=" + cache);
-        media.addOption(":sout-mux-caching=" + cache);
-        media.addOption(":codec=mediacodec,iomx,all");
-
-    }*/
-
-
     @Override
     protected void onStop()
     {
         super.onStop();
         streamPlayer.stop();
     }
-
     @Override
     protected void onDestroy()
     {
